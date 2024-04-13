@@ -6,14 +6,6 @@ use App\Entity\Contract;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Contract>
- *
- * @method Contract|null find($id, $lockMode = null, $lockVersion = null)
- * @method Contract|null findOneBy(array $criteria, array $orderBy = null)
- * @method Contract[]    findAll()
- * @method Contract[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
 class ContractRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -21,28 +13,29 @@ class ContractRepository extends ServiceEntityRepository
         parent::__construct($registry, Contract::class);
     }
 
-//    /**
-//     * @return Contract[] Returns an array of Contract objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    //  Pouvoir créer la table Contract si elle n’existe pas
+    public function createContract($data)
+    {
+        $contract = new Contract();
+        // Initialise les propriétés du contrat avec les données fournies
+        // Puis, persiste l'objet dans la base de données
+        $this->getEntityManager()->persist($contract);
+        $this->getEntityManager()->flush();
 
-//    public function findOneBySomeField($value): ?Contract
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $contract;
+    }
+
+    //  Pouvoir accéder à un contrat en particulier à partir de sa clé unique
+    public function findContractById($id)
+    {
+        return $this->findOneBy(['id' => $id]);
+    }
+
+    // Pouvoir supprimer un contrat
+    public function removeContract(Contract $contract)
+    {
+        $entityManager = $this->getEntityManager();
+        $entityManager->remove($contract);
+        $entityManager->flush();
+    }
 }
