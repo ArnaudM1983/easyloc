@@ -2,7 +2,7 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         driver: 'pdo_mysql'
-        server_version: '5.7'
+        server_version: '11.3.2-MariaDB'
         charset: utf8mb4
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true

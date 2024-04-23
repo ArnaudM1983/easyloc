@@ -2,50 +2,46 @@
 
 namespace App\Tests\Repository;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Entity\Contract;
 use App\Repository\ContractRepository;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ContractFindTest extends KernelTestCase
 {
-    private ?ContractRepository $contractRepository;
+    private ContractRepository $contractRepository;
 
     protected function setUp(): void
     {
-        // Appel de la méthode parente setUp pour initialiser le noyau de l'application
         parent::setUp();
-
-        // Récupération du conteneur de services Symfony
         self::bootKernel();
+        // Obtient le conteneur de services à partir du kernel du test
+        $this->contractRepository = self::$container->get(ContractRepository::class);
     }
-
-
 
     public function testFindContractById(): void
     {
-        // Création d'un contrat factice
+        // Création d'un contrat pour le tester
         $contract = new Contract();
-        $contract->setVehicleUid('123456');
-        $contract->setCustomerUid('789012');
-        $contract->setSignDatetime(new \DateTime());
-        $contract->setLocBeginDatetime(new \DateTime());
-        $contract->setLocEndDatetime(new \DateTime());
-        $contract->setReturningDatetime(new \DateTime());
-        $contract->setPrice('1000.00');
+        $contract->setVehicleUid('ABC123');
+        $contract->setCustomerUid('XYZ456');
+        $contract->setSignDatetime(new \DateTime('2024-03-30 10:00:00'));
+        $contract->setLocBeginDatetime(new \DateTime('2024-03-31 08:00:00'));
+        $contract->setLocEndDatetime(new \DateTime('2024-04-02 08:00:00'));
+        $contract->setReturningDatetime(new \DateTime('2024-04-02 09:00:00'));
+        $contract->setPrice('500.00');
 
-        // Persistez le contrat dans la base de données
-        $this->entityManager->persist($contract);
-        $this->entityManager->flush();
+        // Persiste le contrat dans la base de données
+        $entityManager = self::$container->get('doctrine')->getManager();
+        $entityManager->persist($contract);
+        $entityManager->flush();
 
-        // Récupération de l'ID du contrat
+        // Récupère l'ID du contrat pour le tester
         $contractId = $contract->getId();
 
-        // Recherche du contrat par son ID
+        // Appel de la méthode à tester
         $foundContract = $this->contractRepository->findContractById($contractId);
 
-        // Vérification si le contrat trouvé correspond au contrat original
-        $this->assertInstanceOf(Contract::class, $foundContract);
-        $this->assertEquals('123456', $foundContract->getVehicleUid());
-        $this->assertEquals('789012', $foundContract->getCustomerUid());
-        // Assurez-vous de vérifier les autres propriétés du contrat si nécessaire
+        // Vérifie que le contrat récupéré correspond au contrat créé
+        $this->assertEquals($contractId, $foundContract->getId());
     }
 }

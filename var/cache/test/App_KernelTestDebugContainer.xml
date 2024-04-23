@@ -2555,7 +2555,7 @@
         <argument key="user">root</argument>
         <argument key="password">null</argument>
         <argument key="driverOptions" type="collection"/>
-        <argument key="serverVersion" type="string">5.7</argument>
+        <argument key="serverVersion">11.3.2-MariaDB</argument>
         <argument key="defaultTableOptions" type="collection"/>
       </argument>
       <argument type="service" id="doctrine.dbal.default_connection.configuration"/>

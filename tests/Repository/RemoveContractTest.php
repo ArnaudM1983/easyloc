@@ -45,5 +45,8 @@ class RemoveContractTest extends KernelTestCase
 
         // Vérifie que le contrat a bien été supprimé de la base de données
         $this->assertNull($contractRepository->findContractById($contractId));
+
+        // Réinitialise les gestionnaires d'exceptions après le test
+        restore_exception_handler();
     }
 }
