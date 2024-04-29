@@ -64,14 +64,48 @@ class ContractRepository extends ServiceEntityRepository
         $entityManager->flush();
     }
 
-    // Liste tous les contrats associés à un UID de Customer
+    // Lister Contrats
     public function findContractsByCustomerUid(string $customerUid): array
     {
+        return $this->findBy(['customer_uid' => $customerUid]);
+    }
+
+    // Méthode pour lister les locations en cours pour un client donné
+    public function findOngoingContractsByCustomerUid(string $customerUid): array
+    {
+        $currentDate = new \DateTime();
+
         return $this->createQueryBuilder('c')
-            ->innerJoin(Customer::class, 'cust', 'WITH', 'cust.id = c.customer')
-            ->where('cust.uid = :customerUid')
+            ->andWhere('c.customer_uid = :customerUid')
+            ->andWhere('c.loc_begin_datetime <= :currentDate')
+            ->andWhere('c.loc_end_datetime >= :currentDate')
             ->setParameter('customerUid', $customerUid)
+            ->setParameter('currentDate', $currentDate)
             ->getQuery()
             ->getResult();
     }
+
+    // Méthode pour lister les locations en retard
+    public function findLateContracts(): array
+    {
+        $currentDate = new \DateTime();
+        $lateDate = (new \DateTime())->modify('-1 hour');
+
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.returning_datetime > :lateDate')
+            ->setParameter('lateDate', $lateDate)
+            ->getQuery()
+            ->getResult();
+    }
+
+    // Méthode pour lister tous les paiements associés à une location
+public function findBillingsByContract(Contract $contract): array
+{
+    return $this->createQueryBuilder('c')
+        ->leftJoin('c.billings', 'b')
+        ->andWhere('c.id = :contractId')
+        ->setParameter('contractId', $contract->getId())
+        ->getQuery()
+        ->getResult();
+}
 }
