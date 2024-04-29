@@ -2,12 +2,13 @@
 
 namespace App\Tests\Repository;
 
+
 use App\Entity\Contract;
 use App\Repository\ContractRepository;
 use App\Repository\BillingRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class findLateContractsTest extends KernelTestCase
+class countLateContractsBetweenDatesTest extends KernelTestCase
 {
     protected function setUp(): void
     {
@@ -45,7 +46,7 @@ class findLateContractsTest extends KernelTestCase
         restore_exception_handler();
     }
 
-    public function testfindLateContracts(): void
+    public function testCountLateContractsBetweenDates(): void
     {
         // Obtient le conteneur de services à partir du kernel du test
         $container = static::getContainer();
@@ -68,14 +69,16 @@ class findLateContractsTest extends KernelTestCase
         $entityManager->persist($contract);
         $entityManager->flush();
 
-        // Liste des contrats en retard
-        $lateContracts = $contractRepository->findLateContracts();
+        // Dates de début et de fin pour la recherche de contrats en retard
+        $startDate = new \DateTime('2024-12-01');
+        $endDate = new \DateTime('2024-12-03');
+
+        // Compter les contrats en retard entre les dates données
+        $lateContractsCount = $contractRepository->countLateContractsBetweenDates($startDate, $endDate);
 
         // Assertion
-        $this->assertCount(1, $lateContracts);
-        $this->assertEquals('ABC123', $lateContracts[0]->getVehicleUid());
-        $this->assertEquals('XYZ456', $lateContracts[0]->getCustomerUid());
-        
+        $this->assertEquals(1, $lateContractsCount);
+
         // Réinitialise les gestionnaires d'exceptions après le test
         restore_exception_handler();
     }

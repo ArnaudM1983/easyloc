@@ -14,7 +14,7 @@ class ContractRepository extends ServiceEntityRepository
         parent::__construct($registry, Contract::class);
     }
 
-    //  Pouvoir créer la table Contract si elle n’existe pas
+    // Méthode pour pouvoir créer la table Contract si elle n’existe pas
     public function createContract($data)
     {
         $contract = new Contract();
@@ -26,13 +26,13 @@ class ContractRepository extends ServiceEntityRepository
         return $contract;
     }
 
-    //  Pouvoir accéder à un contrat en particulier à partir de sa clé unique
+    // Méthode pour pouvoir accéder à un contrat en particulier à partir de sa clé unique
     public function findContractById($id)
     {
         return $this->findOneBy(['id' => $id]);
     }
 
-    // Pouvoir créer un nouveau contrat à une autre date
+    // Méthode pour pouvoir créer un nouveau contrat à une autre date
     public function createContractWithDate($data, \DateTimeInterface $date)
     {
         $contract = new Contract();
@@ -56,7 +56,7 @@ class ContractRepository extends ServiceEntityRepository
         return $contract;
     }
     
-    // Pouvoir supprimer un contrat
+    // Méthode pour pouvoir supprimer un contrat
     public function removeContract(Contract $contract)
     {
         $entityManager = $this->getEntityManager();
@@ -64,7 +64,7 @@ class ContractRepository extends ServiceEntityRepository
         $entityManager->flush();
     }
 
-    // Lister Contrats
+    // Méthode pour lister Contrats
     public function findContractsByCustomerUid(string $customerUid): array
     {
         return $this->findBy(['customer_uid' => $customerUid]);
@@ -99,13 +99,23 @@ class ContractRepository extends ServiceEntityRepository
     }
 
     // Méthode pour lister tous les paiements associés à une location
-public function findBillingsByContract(Contract $contract): array
-{
-    return $this->createQueryBuilder('c')
-        ->leftJoin('c.billings', 'b')
-        ->andWhere('c.id = :contractId')
-        ->setParameter('contractId', $contract->getId())
-        ->getQuery()
-        ->getResult();
-}
+    public function findBillingsByContract(Contract $contract): array
+    {
+        return $contract->getBillings()->toArray();
+    }
+
+    // Méthode pour compter et lister les contrats en retard entre deux dates données
+    public function countLateContractsBetweenDates(DateTime $startDate, DateTime $endDate): int
+    {
+        $lateContractsCount = $this->createQueryBuilder('c')
+            ->select('COUNT(c.id) as lateContractsCount')
+            ->andWhere('c.returning_datetime > :startDate')
+            ->andWhere('c.returning_datetime <= :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getSingleScalarResult(); // Utilisez getSingleScalarResult() pour obtenir un entier
+
+        return (int) $lateContractsCount;
+    }
 }

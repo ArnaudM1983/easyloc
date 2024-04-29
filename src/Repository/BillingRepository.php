@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Billing;
+use App\Entity\Contract; 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,7 +14,7 @@ class BillingRepository extends ServiceEntityRepository
         parent::__construct($registry, Billing::class);
     }
 
-    //  Pouvoir créer la table Billing si elle n’existe pas.
+    // Méthode pour pouvoir créer la table Billing si elle n’existe pas.
     public function createTableIfNotExists(): void
     {
         // Vérifie si la table Billing existe dans la base de données
@@ -25,13 +26,13 @@ class BillingRepository extends ServiceEntityRepository
         }
     }
 
-    //  Pouvoir accéder à un payement en particulier à partir de sa clé unique
+    // Méthode pour pouvoir accéder à un payement en particulier à partir de sa clé unique
     public function findBillingById($id)
     {
         return $this->findOneBy(['id' => $id]);
     }
     
-    // Créer un payement
+    // Méthode pour créer un payement
     public function createBilling(Billing $billing): Billing
     {
         $entityManager = $this->getEntityManager();
@@ -41,7 +42,7 @@ class BillingRepository extends ServiceEntityRepository
         return $billing;
     }   
 
-    // Modifier un payement 
+    // Méthode pour modifier un payement 
     public function updateBilling(Billing $billing): Billing
     {   
         $entityManager = $this->getEntityManager();
@@ -50,12 +51,22 @@ class BillingRepository extends ServiceEntityRepository
         return $billing;
     }
 
-    // Supprimer un payement
+    // Méthode pour supprimer un payement
     public function deleteBilling(Billing $billing): void
     {
         $entityManager = $this->getEntityManager();
         $entityManager->remove($billing);
         $entityManager->flush();
+    }
+
+    // Méthode pour récupérer les paiements associés à un contrat spécifique
+    public function findByContract(Contract $contract): array
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.contract = :contract')
+            ->setParameter('contract', $contract)
+            ->getQuery()
+            ->getResult();
     }
 
 }

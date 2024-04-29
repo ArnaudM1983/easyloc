@@ -5,6 +5,7 @@ namespace App\Tests\Repository;
 use App\Entity\Contract;
 use App\Entity\Billing;
 use App\Repository\ContractRepository;
+use App\Repository\BillingRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class findBillingsByContractTest extends KernelTestCase
@@ -32,6 +33,15 @@ class findBillingsByContractTest extends KernelTestCase
             $contractRepository->removeContract($contract);
         }
 
+        // Récupération du repository de billing
+        $billingRepository = $container->get(BillingRepository::class);
+
+        // Suppression de toutes les entrées de la table Billing
+        $billings = $billingRepository->findAll();
+        foreach ($billings as $billing) {
+            $billingRepository->deleteBilling($billing);
+        }
+
         // Réinitialise les gestionnaires d'exceptions après le test
         restore_exception_handler();
     }
@@ -43,6 +53,9 @@ class findBillingsByContractTest extends KernelTestCase
         
         // Récupération du repository de contrat
         $contractRepository = $container->get(ContractRepository::class);
+
+        // Récupération du repository de paiement
+        $billingRepository = $container->get(BillingRepository::class);
 
         // Création d'un contrat avec toutes les valeurs nécessaires
         $contract = new Contract();
@@ -65,16 +78,16 @@ class findBillingsByContractTest extends KernelTestCase
         $billing->setAmount('100.00');
 
         // Persiste le paiement dans la base de données
-        $entityManager->persist($billing);
-        $entityManager->flush();
-
-        // Récupération des paiements associés au contrat
-        $billings = $contractRepository->findBillingsByContract($contract);
-
-        // Assertion
-        $this->assertCount(1, $billings);
-        $this->assertEquals('100.00', $billings[0]->getAmount());
+        $billingRepository->createBilling($billing);
         
+        // Récupération des paiements associés au contrat
+        $billings = $billingRepository->findByContract($contract);
+        
+        // Assertions
+        $this->assertCount(1, $billings);
+        $this->assertInstanceOf(Billing::class, $billings[0]);
+        $this->assertEquals('100.00', $billings[0]->getAmount());
+
         // Réinitialise les gestionnaires d'exceptions après le test
         restore_exception_handler();
     }
