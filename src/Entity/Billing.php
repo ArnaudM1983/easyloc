@@ -14,7 +14,7 @@ class Billing
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Contract::class)]
+    #[ORM\ManyToOne(targetEntity: Contract::class, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "contract_id", referencedColumnName: "id", nullable: false)]
     private ?Contract $contract = null;
 

@@ -14,7 +14,7 @@ class RemoveContractTest extends KernelTestCase
         self::bootKernel();
     }
 
-    public function testRemoveContract()
+    public function testRemoveContract(): void
     {
         // Obtient le conteneur de services à partir du kernel du test
         $container = static::getContainer();

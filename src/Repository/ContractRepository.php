@@ -63,4 +63,15 @@ class ContractRepository extends ServiceEntityRepository
         $entityManager->remove($contract);
         $entityManager->flush();
     }
+
+    // Liste tous les contrats associés à un UID de Customer
+    public function findContractsByCustomerUid(string $customerUid): array
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin(Customer::class, 'cust', 'WITH', 'cust.id = c.customer')
+            ->where('cust.uid = :customerUid')
+            ->setParameter('customerUid', $customerUid)
+            ->getQuery()
+            ->getResult();
+    }
 }

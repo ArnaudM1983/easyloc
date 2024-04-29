@@ -8,18 +8,20 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ContractFindTest extends KernelTestCase
 {
-    private ContractRepository $contractRepository;
-
     protected function setUp(): void
     {
         parent::setUp();
         self::bootKernel();
-        // Obtient le conteneur de services à partir du kernel du test
-        $this->contractRepository = self::$container->get(ContractRepository::class);
     }
 
     public function testFindContractById(): void
     {
+        // Obtient le conteneur de services à partir du kernel du test
+        $container = static::getContainer();
+        
+        // Récupération du repository de contrat
+        $contractRepository = $container->get(ContractRepository::class);
+        
         // Création d'un contrat pour le tester
         $contract = new Contract();
         $contract->setVehicleUid('ABC123');
@@ -31,7 +33,7 @@ class ContractFindTest extends KernelTestCase
         $contract->setPrice('500.00');
 
         // Persiste le contrat dans la base de données
-        $entityManager = self::$container->get('doctrine')->getManager();
+        $entityManager = $container->get('doctrine')->getManager();
         $entityManager->persist($contract);
         $entityManager->flush();
 
@@ -39,9 +41,12 @@ class ContractFindTest extends KernelTestCase
         $contractId = $contract->getId();
 
         // Appel de la méthode à tester
-        $foundContract = $this->contractRepository->findContractById($contractId);
+        $foundContract = $contractRepository->findContractById($contractId);
 
         // Vérifie que le contrat récupéré correspond au contrat créé
         $this->assertEquals($contractId, $foundContract->getId());
+
+        // Réinitialise les gestionnaires d'exceptions après le test
+        restore_exception_handler();
     }
 }
